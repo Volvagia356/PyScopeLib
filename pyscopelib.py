@@ -1,4 +1,5 @@
 from struct import pack
+import math
 
 PPF = 800 # Points per frame
 
@@ -44,4 +45,28 @@ class Line():
             x = int(self.x1 + dx * i)
             y = int(self.y1 + dy * i)
             points.append((x,y))
+        return points
+
+class Arc():
+    def __init__(self, x, y, radius, start, end):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.start = start
+        self.end = end
+
+    def _get_arc_size(self):
+        return self.end-self.start
+
+    def get_length(self):
+        return 2 * math.pi * self.radius * (abs(self._get_arc_size()) / 360)
+
+    def get_points(self, point_count):
+        points = []
+        d_angle = self._get_arc_size() / point_count
+        for i in range(point_count):
+            angle = self.start + d_angle * i
+            x = int(self.x + self.radius * math.cos(math.radians(angle)))
+            y = int(self.y + self.radius * math.sin(math.radians(angle)))
+            points.append((x, y))
         return points
