@@ -7,16 +7,22 @@ class Frame():
     def __init__(self):
         self.shapes = []
 
+    def _get_lengths(self):
+        return [x.get_length() for x in self.shapes]
+
     def add_shape(self, shape):
         self.shapes.append(shape)
 
-    def get_points(self):
+    def get_length(self):
+        return sum(self._get_lengths())
+
+    def get_points(self, point_count=PPF):
         points = []
-        lengths = [x.get_length() for x in self.shapes]
-        total_length = sum(lengths)
+        lengths = self._get_lengths()
+        total_length = self.get_length()
         for i, length in enumerate(lengths):
-            point_count = round(length/total_length*PPF)
-            points += self.shapes[i].get_points(point_count)
+            shape_point_count = round(length/total_length*point_count)
+            points += self.shapes[i].get_points(shape_point_count)
         return points
 
     def get_pcm(self):
@@ -70,3 +76,24 @@ class Arc():
             y = int(self.y + self.radius * math.sin(math.radians(angle)))
             points.append((x, y))
         return points
+
+class Rectangle():
+    def __init__(self, x1, y1, x2, y2):
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
+    def _generate_frame(self):
+        self.frame = Frame()
+        self.frame.add_shape(Line(self.x1, self.y1, self.x2, self.y1))
+        self.frame.add_shape(Line(self.x2, self.y1, self.x2, self.y2))
+        self.frame.add_shape(Line(self.x2, self.y2, self.x1, self.y2))
+        self.frame.add_shape(Line(self.x1, self.y2, self.x1, self.y1))
+
+    def get_length(self):
+        self._generate_frame()
+        return self.frame.get_length()
+
+    def get_points(self, point_count):
+        return self.frame.get_points(point_count)
