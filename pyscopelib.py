@@ -1,7 +1,9 @@
 from struct import pack
+from sys import stderr
 import math
 
 PPF = 800 # Points per frame
+last_point = (32768, 32768)
 
 class Frame():
     def __init__(self):
@@ -17,12 +19,16 @@ class Frame():
         return sum(self._get_lengths())
 
     def get_points(self, point_count=PPF):
+        global last_point
         points = []
         lengths = self._get_lengths()
         total_length = self.get_length()
+        if total_length ==0:
+            return [last_point] * PPF
         for i, length in enumerate(lengths):
             shape_point_count = round(length/total_length*point_count)
             points += self.shapes[i].get_points(shape_point_count)
+        last_point = points[-1]
         return points
 
     def get_pcm(self):
@@ -44,6 +50,7 @@ class Line():
         return ((self.x1-self.x2)**2+(self.y1-self.y2)**2)**0.5
 
     def get_points(self, point_count):
+        if point_count == 0: return []
         points = []
         dx = (self.x2-self.x1)/point_count
         dy = (self.y2-self.y1)/point_count
@@ -68,6 +75,7 @@ class Arc():
         return 2 * math.pi * self.radius * (abs(self._get_arc_size()) / 360)
 
     def get_points(self, point_count):
+        if point_count == 0: return []
         points = []
         d_angle = self._get_arc_size() / point_count
         for i in range(point_count):
